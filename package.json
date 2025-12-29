@@ -11,6 +11,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.14",
+    "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -33,9 +35,13 @@
     "vite": "^7.2.4"
   },
   "lint-staged": {
-    "**/*.{js,jsx}": [
+    "src/**/*.{js,jsx}": [
       "npx prettier --write",
-      "npx eslint --fix"
+      "npx eslint -c ./eslint.config.js --fix"
+    ],
+    "backend/src/**/*.js": [
+      "npx prettier --write",
+      "npx eslint -c ./backend/eslint.config.js --fix"
     ]
   }
 }
