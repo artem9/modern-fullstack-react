@@ -126,7 +126,7 @@ describe('listing posts', () => {
   })
 
   test('should be able to filter posts by author', async () => {
-    const posts = await listPostsByAuthor(createdUser1._id)
+    const posts = await listPostsByAuthor(createdUser1.username)
     expect(posts.length).toEqual(2)
   })
 

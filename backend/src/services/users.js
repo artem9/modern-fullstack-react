@@ -29,7 +29,7 @@ export async function getUserInfoById(userId) {
     const user = await User.findById(userId)
     if (!user) return { username: userId }
     return { username: user.username }
-  } catch (err) {
+  } catch {
     return { username: userId }
   }
 }

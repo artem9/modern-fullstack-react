@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { createPost } from '../api/posts.js'
-import { useAuth } from '../contexts/AuthContext.jsx'
+import { useAuth } from '../hooks/useAuth.js'
 
 export function CreatePost() {
   const [token] = useAuth()

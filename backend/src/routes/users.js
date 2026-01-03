@@ -5,7 +5,7 @@ export function userRoutes(app) {
     try {
       const user = await createUser(req.body)
       return res.status(201).json({ username: user.username })
-    } catch (err) {
+    } catch {
       return res.status(400).json({
         error: 'failed to create the user, does the username already exist?',
       })
@@ -16,7 +16,7 @@ export function userRoutes(app) {
     try {
       const token = await loginUser(req.body)
       return res.status(200).send({ token })
-    } catch (err) {
+    } catch {
       return res.status(400).send({
         error: 'login failed, did you enter the correct username/password?',
       })

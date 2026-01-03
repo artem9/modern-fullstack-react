@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 
 import { User } from './User.jsx'
-import { useAuth } from '../contexts/AuthContext.jsx'
+import { useAuth } from '../hooks/useAuth.js'
 
 export function Header() {
   const [token, setToken] = useAuth()
