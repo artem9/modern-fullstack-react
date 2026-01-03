@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import { beforeEach, describe, expect, test } from '@jest/globals'
 
 import { Post } from '../db/models/post.js'
+import { User } from '../db/models/user.js'
 import {
   createPost,
   deletePost,
@@ -16,11 +17,10 @@ describe('creating posts', () => {
   test('with all parameters should succeed', async () => {
     const post = {
       title: 'Hello Mongoose!',
-      author: 'Daniel Bugl',
       contents: 'This post is stored in a MongoDB database using Mongoose.',
       tags: ['mongoose', 'mongodb'],
     }
-    const createdPost = await createPost(post)
+    const createdPost = await createPost(createdUser1._id, post)
 
     expect(createdPost._id).toBeInstanceOf(mongoose.Types.ObjectId)
 
@@ -33,12 +33,11 @@ describe('creating posts', () => {
 
   test('creating posts without title should fail', async () => {
     const post = {
-      author: 'Daniel Bugl',
       contents: 'This post with no title.',
       tags: ['empty'],
     }
     try {
-      await createPost(post)
+      await createPost(createdUser1._id, post)
     } catch (err) {
       expect(err).toBeInstanceOf(mongoose.Error.ValidationError)
       expect(err.message).toContain('`title` is required')
@@ -49,30 +48,50 @@ describe('creating posts', () => {
     const post = {
       title: 'Only a title',
     }
-    const createdPost = await createPost(post)
+    const createdPost = await createPost(createdUser1._id, post)
 
     expect(createdPost._id).toBeInstanceOf(mongoose.Types.ObjectId)
   })
 })
 
 const samplePosts = [
-  { title: 'Learning Redux', author: 'Daniel Bugl', tags: ['redux'] },
-  { title: 'Learn React Hooks', author: 'Daniel Bugl', tags: ['react'] },
-  {
-    title: 'Full-Stack React Projects',
-    author: 'Daniel Bugl',
-    tags: ['react', 'nodejs'],
-  },
+  { title: 'Learning Redux', tags: ['redux'] },
+  { title: 'Learn React Hooks', tags: ['react'] },
+  { title: 'Full-Stack React Projects', tags: ['react', 'nodejs'] },
   { title: 'Guide to TypeScript' },
 ]
 
+const sampleUser1 = {
+  username: 'Andy Stan',
+  password: '12345',
+}
+
+const sampleUser2 = {
+  username: 'Mike Smit',
+  password: '43121',
+}
+
 let createdSamplePosts = []
+let createdUser1 = undefined
+let createdUser2 = undefined
 
 beforeEach(async () => {
   await Post.deleteMany({})
+  await User.deleteMany({})
+
+  const user1 = new User(sampleUser1)
+  const user2 = new User(sampleUser2)
+  createdUser1 = await user1.save()
+  createdUser2 = await user2.save()
+
   createdSamplePosts = []
-  for (const post of samplePosts) {
-    const createdPost = new Post(post)
+  for (const [index, post] of samplePosts.entries()) {
+    // update author property with a real user id
+    const userId = index % 2 === 0 ? createdUser1._id : createdUser2._id
+    const createdPost = new Post({
+      ...post,
+      author: userId,
+    })
     createdSamplePosts.push(await createdPost.save())
   }
 })
@@ -107,8 +126,8 @@ describe('listing posts', () => {
   })
 
   test('should be able to filter posts by author', async () => {
-    const posts = await listPostsByAuthor('Daniel Bugl')
-    expect(posts.length).toEqual(3)
+    const posts = await listPostsByAuthor(createdUser1._id)
+    expect(posts.length).toEqual(2)
   })
 
   test('should be able to filter posts by tag', async () => {
@@ -131,19 +150,28 @@ describe('getting a post', () => {
 
 describe('updating posts', () => {
   test('should update the specified property', async () => {
-    await updatePost(createdSamplePosts[0]._id, { author: 'Test Author' })
-    const updatedPost = await Post.findById(createdSamplePosts[0]._id)
-    expect(updatedPost.author).toEqual('Test Author')
+    await updatePost(createdUser1._id, createdSamplePosts[0]._id, {
+      tags: ['react', 'redux'],
+    })
+    const updatedPost = await Post.findOne({
+      author: createdUser1._id,
+      _id: createdSamplePosts[0]._id,
+    })
+    expect(updatedPost.tags).toEqual(['react', 'redux'])
   })
 
   test('should not update other properties', async () => {
-    await updatePost(createdSamplePosts[0]._id, { author: 'Test Author' })
+    await updatePost(createdUser1._id, createdSamplePosts[0]._id, {
+      tags: ['typescript'],
+    })
     const updatedPost = await Post.findById(createdSamplePosts[0]._id)
     expect(updatedPost.title).toEqual('Learning Redux')
   })
 
   test('should update updatedAt timestamp', async () => {
-    await updatePost(createdSamplePosts[0]._id, { author: 'Test Author' })
+    await updatePost(createdUser1._id, createdSamplePosts[0]._id, {
+      title: 'Redux Toolkit',
+    })
     const updatedPost = await Post.findById(createdSamplePosts[0]._id)
     expect(updatedPost.updatedAt.getTime()).toBeGreaterThan(
       createdSamplePosts[0].updatedAt.getTime(),
@@ -151,16 +179,20 @@ describe('updating posts', () => {
   })
 
   test('should fail if the id does not exist', async () => {
-    const updatedPost = await updatePost('000000000000000000000000', {
-      author: 'Test Author',
-    })
+    const updatedPost = await updatePost(
+      createdUser1._id,
+      '000000000000000000000000',
+      {
+        tags: ['typescript'],
+      },
+    )
     expect(updatedPost).toEqual(null)
   })
 })
 
 describe('deleting posts', () => {
   test('should remove the post from the database', async () => {
-    const result = await deletePost(createdSamplePosts[0]._id)
+    const result = await deletePost(createdUser1._id, createdSamplePosts[0]._id)
     expect(result.deletedCount).toEqual(1)
     const deletedPost = await Post.findById(createdSamplePosts[0]._id)
     expect(deletedPost).toEqual(null)
