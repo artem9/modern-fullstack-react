@@ -21,7 +21,6 @@ services:
       context: .
       args:
         VITE_BACKEND_URL: http://localhost:3001/api/v1
-        PORT: 3000
     ports:
       - '3000:80'
     depends_on:
