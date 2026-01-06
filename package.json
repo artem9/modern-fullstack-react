@@ -4,14 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node server",
+    "start": "cross-env NODE_ENV=production node server",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build --outDir dist/client",
+    "build:server": "vite build --outDir dist/server --ssr src/entry-server.jsx",
     "lint": "eslint src",
     "preview": "vite preview",
     "prepare": "husky"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.14",
+    "compression": "^1.8.1",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "jwt-decode": "^4.0.0",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
@@ -34,7 +41,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vite-plugin-devtools-json": "^1.0.0"
   },
   "lint-staged": {
     "src/**/*.{js,jsx}": [
