@@ -23,7 +23,9 @@
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.11.0"
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^7.11.0",
+    "slug": "^11.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
@@ -53,5 +55,10 @@
       "npx prettier --write",
       "npx eslint -c ./backend/eslint.config.js --fix"
     ]
+  },
+  "overrides": {
+    "react-helmet-async": {
+      "react": "^16.8.0 || ^17 || ^18 || ^19"
+    }
   }
 }
