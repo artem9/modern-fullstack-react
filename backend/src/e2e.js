@@ -7,7 +7,7 @@ import { initDatabase } from './db/init.js'
 async function runTestingServer() {
   await globalSetup()
   await initDatabase()
-  const PORT = process.env.PORT
+  const PORT = process.env.PORT || 3001
   app.listen(PORT)
   console.info(`TESTING express server running on http://localhost:${PORT}`)
 }
